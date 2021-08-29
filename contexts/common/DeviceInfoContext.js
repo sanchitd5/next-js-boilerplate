@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { LoadingScreen } from '../../components/index';
+import { LoadingScreen } from 'components/index';
 import { validate, v4 } from 'uuid';
 import { deviceDetect } from 'react-device-detect';
 

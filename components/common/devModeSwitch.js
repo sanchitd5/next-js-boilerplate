@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { FormControlLabel, Switch, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { DeveloperConfig } from '../../constants/index';
-import { LayoutContext, LoginContext } from '../../contexts/index';
+import { DeveloperConfig } from 'constants/index';
+import { LayoutContext, LoginContext } from 'contexts/index';
 
 const useStyles = makeStyles(theme => ({
   '@global': {

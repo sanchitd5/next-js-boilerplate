@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import Head from 'next/head';
 import { useMediaQuery } from '@material-ui/core';
 import { makeStyles, createStyles } from '@material-ui/styles';
 import { Header, BottomNavToolbar } from '../components';

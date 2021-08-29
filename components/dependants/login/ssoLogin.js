@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@material-ui/core';
-import { APIKeys } from '../../../constants/index';
+import { APIKeys } from 'constants/index';
 
 export const SsoLogin = () => {
   return <Button component={'a'}

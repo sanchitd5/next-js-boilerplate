@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { ConnectionConfig, DeveloperConfig } from '../../constants/index';
+import { ConnectionConfig, DeveloperConfig } from 'constants/index';
 import { useSocket } from './service';
 import { socketAuthCallback } from './util';
 

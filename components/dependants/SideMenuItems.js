@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link } from 'next';
 import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
-import { LayoutContext } from '../../contexts';
+import { LayoutContext } from 'contexts';
 import { Icon as ParentIcon } from '@material-ui/core';
 import { InlineIcon } from '@iconify/react';
-import { API } from '../../helpers';
-import { LayoutConfig } from '../../constants/index';
+import { API } from 'helpers';
+import { LayoutConfig } from 'constants/index';
 
 export const SideMenuItems = () => {
   const { setPageTitle, layoutConfiguration, currentUserRole } = useContext(LayoutContext);

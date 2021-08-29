@@ -1,8 +1,8 @@
 import React, { useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { API, socketAuthCallback } from '../../helpers';
-import { ConnectionConfig } from '../../constants/index';
-import { LoginContext, LayoutContext } from '../../contexts';
+import { API, socketAuthCallback } from 'helpers';
+import { ConnectionConfig } from 'constants/index';
+import { LoginContext, LayoutContext } from 'contexts';
 
 export const LoginCheck = (props) => {
   const { accessToken } = useContext(LoginContext);

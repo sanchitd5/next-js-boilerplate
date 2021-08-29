@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Box, Button, FormHelperText, TextField } from '@material-ui/core';
-import { LoginContext } from '../../../contexts';
-import { ConnectionConfig, DeveloperConfig } from '../../../constants/index';
+import { LoginContext } from 'contexts';
+import { ConnectionConfig, DeveloperConfig } from 'constants/index';
 
 export const LoginForm = (props) => {
   const { devMode, setAccessToken } = useContext(LoginContext);

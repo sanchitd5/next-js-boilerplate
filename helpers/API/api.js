@@ -1,4 +1,4 @@
-import { AccessToken, logout } from '../../contexts/helpers';
+import { AccessToken, logout } from 'contexts/helpers';
 import { axiosInstance, errorHelper, generateSuccess } from './axiosInstance';
 
 class API {

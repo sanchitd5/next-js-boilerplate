@@ -2,11 +2,10 @@ import React, { useCallback, useContext } from 'react';
 import { Link as NextLink } from 'next';
 import { Typography, Box, Container, Card, CardContent, Divider, Link } from '@material-ui/core';
 import { makeStyles, createStyles } from '@material-ui/styles';
-import AppplicationWrapper from '../bricks/ApplicationWrapper';
-import { API } from '../helpers';
-import { LoginForm } from '../components';
-import { LoginContext, DeviceInfoContext, LayoutContext } from '../contexts';
-import { ConnectionConfig } from '../constants/index';
+import { API } from 'helpers';
+import { LoginForm } from 'components';
+import { LoginContext, DeviceInfoContext, LayoutContext } from 'contexts';
+import { ConnectionConfig } from 'constants/index';
 
 
 const useStyles = makeStyles(() => createStyles({
@@ -96,9 +95,4 @@ const Login = () => {
   return content;
 }
 
-const Exporter = () => {
-  return <AppplicationWrapper><Login /></AppplicationWrapper>
-}
-
-
-export default Exporter;
+export default Login;

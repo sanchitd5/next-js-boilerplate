@@ -1,13 +1,13 @@
 import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/router'
-import { LoginContext, ContextManager } from '../contexts';
-import { LoadingScreen } from '../components';
+import { LoginContext } from '../contexts';
+import { LoadingScreen } from 'components';
 
-const InternalComponent = () => {
+const IndexPage = () => {
   const { loginStatus } = useContext(LoginContext);
   const router = useRouter();
   useEffect(() => {
-    if (loginStatus) {
+    if (loginStatus === true) {
       router.replace('/home');
     }
     else router.replace('/login');
@@ -15,8 +15,4 @@ const InternalComponent = () => {
   return <LoadingScreen />
 }
 
-export default function Home() {
-  return <ContextManager>
-    <InternalComponent />
-  </ContextManager>;
-}
+export default IndexPage;

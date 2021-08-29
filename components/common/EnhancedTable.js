@@ -1,34 +1,14 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Typography, TablePagination, Checkbox, IconButton, Toolbar, Button, Grid, Switch } from '@material-ui/core';
-import { useTheme, makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
-const useStyles = makeStyles(theme => ({
-  root: {
-    width: '100%',
-    marginTop: theme.spacing(0),
-    overflowX: 'auto'
-  },
-  tableWrapper: {
-    overflow: 'auto',
-    maxHeight: 407
-  },
-  table: {
-    minWidth: 650,
-  },
-  spacer: {
-    flex: '1 1 100%',
-  },
-  title: {
-    flex: '0 0 auto',
-  },
-  actions: {
-    float: 'right'
-  }
-}));
+import { TextHelper } from 'helpers/index';
+import { makeStyles } from '@material-ui/styles';
+
 
 /**
  * 
@@ -84,11 +64,111 @@ const useStyles = makeStyles(theme => ({
     }} />
  */
 
+const arrayDiff = (arrayA, arrayB) => {
+  var result = [];
+  for (var i = 0; i < arrayA.length; i++) {
+    if (arrayB.indexOf(arrayA[i]) <= -1) {
+      result.push(arrayA[i]);
+    }
+  }
+  return result;
+};
+
+const breakObject = (obj) => {
+  if (obj === null || obj === undefined) return 'No Data';
+  if (!Array.isArray(obj)) return null;
+  if (obj[0] === undefined) return 'No Data';
+  if (obj[0] === null) return 'No Data';
+  if (obj[0] instanceof Object) {
+    let _keys = Object.keys(obj[0]);
+    return (
+      <Table>
+        <TableHead>
+          <TableRow>
+            {_keys.map((value) => {
+              return (
+                <TableCell key={Math.random()}>
+                  {value}
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {
+            obj.map(value => {
+              return (<TableRow key={Math.random()}>{
+                _keys.map((valueA) => {
+                  return (<TableCell key={Math.random()}>
+                    <Typography varient="body1">
+                      {Array.isArray(value[valueA]) ? breakObject(value[valueA]) : String(value[valueA])}
+                    </Typography>
+                  </TableCell>);
+                })
+              }
+              </TableRow>);
+            })}
+        </TableBody>
+      </Table>
+    );
+  }
+  else
+    return (obj.map((value, i) => {
+      return (<>
+        <Typography>
+          {value}
+        </Typography>
+        {i < obj.length - 1 ? <br /> : null}
+      </>);
+    }));
+};
+
+const RenderRow = (props) => {
+  return props.keys.map((key) => {
+    return (<TableCell style={props.styles !== undefined ? props.styles.tableCell !== undefined ? props.styles.tableCell : null : null} key={Math.random()}>
+      <Typography varient="body1">
+        {Array.isArray(props.data[key]) ? breakObject(props.data[key]) : String(props.data[key])}
+      </Typography>
+    </TableCell>);
+  });
+};
+
+RenderRow.propTypes = {
+  keys: PropTypes.array.isRequired,
+  data: PropTypes.any,
+};
+
 export const EnhancedTable = (props) => {
+
+
+  const useStyles = makeStyles(theme => ({
+    root: {
+      width: '100%',
+      marginTop: theme.spacing(0),
+      overflowX: 'auto'
+    },
+    tableWrapper: {
+      maxHeight: props?.options?.ui?.maxHeight || 407,
+      overflowY: 'auto',
+      '-webkit-overflow-scrolling': 'touch',
+    },
+    table: {
+      minWidth: props?.options?.ui?.minWidth || 650,
+    },
+    spacer: {
+      flex: '1 1 100%',
+    },
+    title: {
+      flex: '0 0 auto',
+    },
+    actions: {
+      float: 'right'
+    },
+  }));
   const classes = useStyles();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [obj, setObj] = useState([]);
+  const [rowsPerPage, setRowsPerPage] = useState(props.rows !== undefined ? props.rows : 5);
+  const [obj] = useState(props.data);
   var selecteditems = useMemo(() => [], []);
   const useStyles1 = makeStyles(theme => ({
     root: {
@@ -165,18 +245,6 @@ export const EnhancedTable = (props) => {
       </div>
     );
   };
-  const arrayDiff = (arrayA, arrayB) => {
-    var result = [];
-    for (var i = 0; i < arrayA.length; i++) {
-      if (arrayB.indexOf(arrayA[i]) <= -1) {
-        result.push(arrayA[i]);
-      }
-    }
-    return result;
-  };
-  useEffect(() => {
-    setObj(props.data);
-  }, [props.data]);
   const [selectedItemsNum, setSelectedItems] = useState(0);
   useEffect(() => {
     setSelectedItems(selecteditems.length);
@@ -216,7 +284,9 @@ export const EnhancedTable = (props) => {
   };
   const renderHeader = () => {
     return _keys.map((key) => {
-      return <Heading style={props.styles !== undefined ? props.styles.heading !== undefined ? props.styles.heading : null : null} key={Math.random()} value={key} />;
+      return <Heading
+        style={props.styles !== undefined ? props.styles.heading !== undefined ? props.styles.heading : null : null}
+        key={Math.random()} value={props.options && props.options.titleCaseHeadings ? TextHelper.titleCase(key) : key} />;
     });
   };
   const ActionButtonSwitch = (props) => {
@@ -256,63 +326,8 @@ export const EnhancedTable = (props) => {
     label: PropTypes.string.isRequired,
     function: PropTypes.func.isRequired
   };
-  const breakObject = (obj) => {
-    if (obj === null || obj === undefined) return 'No Data';
-    if (!Array.isArray(obj)) return null;
-    if (obj[0] === undefined) return 'No Data';
-    if (obj[0] === null) return 'No Data';
-    if (obj[0] instanceof Object) {
-      let _keys = Object.keys(obj[0]);
-      return (
-        <Table>
-          <TableHead>
-            <TableRow>
-              {_keys.map((value) => {
-                return (
-                  <TableCell key={Math.random()}>
-                    {value}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {
-              obj.map(value => {
-                return (<TableRow key={Math.random()}>{
-                  _keys.map((valueA) => {
-                    return (<TableCell key={Math.random()}>
-                      <Typography varient="body1">
-                        {Array.isArray(value[valueA]) ? breakObject(value[valueA]) : String(value[valueA])}
-                      </Typography>
-                    </TableCell>);
-                  })
-                }
-                </TableRow>);
-              })}
-          </TableBody>
-        </Table>
-      );
-    }
-    else
-      return (obj.map((value, i) => {
-        return (<>
-          <Typography>
-            {value}
-          </Typography>
-          {i < obj.length - 1 ? <br /> : null}
-        </>);
-      }));
-  };
-  const RenderRow = (props) => {
-    return props.keys.map((key) => {
-      return (<TableCell style={props.styles !== undefined ? props.styles.tableCell !== undefined ? props.styles.tableCell : null : null} key={Math.random()}>
-        <Typography varient="body1">
-          {Array.isArray(props.data[key]) ? breakObject(props.data[key]) : String(props.data[key])}
-        </Typography>
-      </TableCell>);
-    });
-  };
+
+
 
   const toggleSelectedItem = (item, value) => {
     let _selectedItems = selecteditems;
@@ -343,10 +358,12 @@ export const EnhancedTable = (props) => {
   Selector.propTypes = {
     selectedObject: PropTypes.any
   };
-  const renderActions = (__obj) => {
+  const renderActions = useCallback((__obj) => {
     let defaultValue;
+    if (props.options === undefined) return null;
     if (props.options.actions !== undefined) {
       return props.options.actions.map(value => {
+        if (value === false) return null;
         defaultValue = value.defaultValueFrom !== undefined ? __obj[value.defaultValueFrom] : false;
         return (<TableCell style={props.styles !== undefined ? props.styles.tableCell !== undefined ? props.styles.tableCell : null : null} key={Math.random()}>
           {value.type === 'switch' ?
@@ -357,17 +374,20 @@ export const EnhancedTable = (props) => {
         );
       });
     }
-  };
-  const getRowsData = (data) => {
+  }, [props.options, props.styles]);
+  const getRowsData = useCallback((data) => {
     if (props.options !== undefined)
       if (props.options.disablePagination)
         return data.map((row, index) => {
           return (
             <TableRow key={Math.random()}>
-              {(props.options !== undefined ? props.options.selector ? (props.options.toolbarActions !== undefined ? <TableCell style={props.styles !== undefined ? props.styles.tableCell !== undefined ? props.styles.tableCell : null : null} key={index + "select"}><Selector
-                selectedObject={obj[index]}
-              /></TableCell> : null) : null : null)}
-              {(props.options !== undefined ? props.options.actionLocation === "start" ? (props.options.actions !== undefined ? renderActions(obj[index]) : null) : null : null)}
+              {(props.options !== undefined ? props.options.selector ? (props.options.toolbarActions !== undefined ?
+                <TableCell style={props.styles !== undefined ? props.styles.tableCell !== undefined ? props.styles.tableCell : null : null} key={index + "select"}>
+                  <Selector selectedObject={obj[index]} />
+                </TableCell> : null) : null : null)}
+              {(props.options !== undefined ? props.options.actionLocation === "start" ?
+                (props.options.actions !== undefined ? renderActions(obj[index]) : null)
+                : null : null)}
               <RenderRow key={Math.random()} page={page} data={row} keys={_keys} />
               {(props.options !== undefined ? props.options.actionLocation !== "start" ? (props.options.actions !== undefined ? renderActions(obj[index]) : null) : null : null)}
             </TableRow>);
@@ -383,22 +403,36 @@ export const EnhancedTable = (props) => {
           {(props.options !== undefined ? props.options.actionLocation !== 'start' ? (props.options.actions !== undefined ? renderActions(obj[index]) : null) : null : null)}
         </TableRow>);
     });
-  };
+  }, [_keys, obj, page, props.options, props.styles, renderActions, rowsPerPage]);
 
   const renderActionHeaders = () => {
     return props.options.actions.map(value => {
-      return <Heading style={props.styles !== undefined ? props.styles.heading !== undefined ? props.styles.heading : null : null} key={Math.random()} value={value.name} />;
+      if (value === false) return null;
+      return <Heading
+        style={props.styles !== undefined ? props.styles.heading !== undefined ? props.styles.heading : null : null}
+        key={Math.random()} value={props.options && props.options.titleCaseHeadings ? TextHelper.titleCase(value.name) : value.name} />;
     });
   };
 
   const renderEmptyRows = () => {
-    if (obj === undefined || obj === null)
+    if (props.error)
       return (< TableRow style={{ height: 48 * 5 }} >
         <TableCell colSpan={5} style={{ color: 'red', fontWeight: '500' }}>
           <Grid container spacing={0}
             align="center"
             justify="center">
-            <Grid item>
+            <Grid item xs={12}>
+              <Typography>{props.error}</Typography>
+            </Grid>
+          </Grid></TableCell>
+      </TableRow >);
+    if (obj === undefined || obj === null)
+      return (< TableRow style={{ height: 48 * 5 }} >
+        <TableCell colSpan={5} style={{ color: 'red', fontWeight: '500' }}>
+          <Grid container spacing={0}
+            alignItems="center"
+            justifyContent="center">
+            <Grid item xs={12}>
               <Typography>INVALID DATA IN THE TABLE</Typography>
             </Grid>
           </Grid></TableCell>
@@ -407,18 +441,26 @@ export const EnhancedTable = (props) => {
       return (< TableRow style={{ height: 48 * 5 }} >
         <TableCell colSpan={5} >
           <Grid container spacing={0}
-            align="center"
-            justify="center">
-            <Grid item>
+            alignItems="center"
+            justifyContent="center">
+            <Grid item >
               <Typography>Sorry! No Data Present</Typography>
             </Grid>
           </Grid>
         </TableCell>
       </TableRow >);
     }
-    if (emptyRows > 0)
-      return (< TableRow style={{ height: 48 * emptyRows }} >
-        <TableCell style={props.styles !== undefined ? props.styles.tableCell !== undefined ? props.styles.tableCell : null : null} colSpan={(props.options !== undefined ? props.options.selector ? _keys.length + 1 : _keys.length : _keys.length)} />
+    if (emptyRows > 0 && !(props.options && props.options.ui && props.options.ui.disableContainer))
+      return (<TableRow style={{ height: 48 * emptyRows }} >
+        <TableCell
+          style={props.styles !== undefined ? props.styles.tableCell !== undefined ? props.styles.tableCell : null : null}
+          colSpan={(props.options !== undefined ?
+            props.options.selector ?
+              props.options.actions !== undefined ? _keys.length + 1 + props.options.actions.filter(value => value !== false).length
+                : _keys.length + 1 :
+              props.options.actions !== undefined ? _keys.length + props.options.actions.filter(value => value !== false).length
+                : _keys.length :
+            _keys.length)} />
       </TableRow >);
     else return null;
   };
@@ -429,6 +471,7 @@ export const EnhancedTable = (props) => {
   }
 
   const createBar = () => {
+    if (props?.options?.ui?.disableTitle === true) return null;
     return (
       <Toolbar style={props.styles !== undefined ? props.styles.toolbar !== undefined ? props.styles.toolbar : null : null}>
         <div className={classes.title}>
@@ -443,88 +486,117 @@ export const EnhancedTable = (props) => {
           }
         </div>
         <div className={classes.spacer} />
-        {props.options && <Grid container spacing={1} direction="row" justifyContent="flex-end" alignItems="flex-end">
-          {props.options.toolbarActions !== undefined ?
-            props.options.toolbarActions.map((value, i) => {
-              return (<Grid item key={'toolbarAction' + i}>
-                <Button color="primary" size="small" onClick={(e) => value.function(e, selecteditems)} variant="contained">{value.label}</Button>
-              </Grid>);
-            })
-            : ''
-          }
-        </Grid>}
-      </Toolbar>);
+        {
+          props.options && <Grid container spacing={1} direction="row" justifyContent="flex-end" alignItems="flex-end">
+            {props.options.toolbarActions !== undefined ?
+              props.options.toolbarActions.map((value, i) => {
+                if (value === undefined || value === false) return null;
+                return (<Grid item key={'toolbarAction' + i}>
+                  <Button color="primary" size="small" onClick={(e) => value.function(e, selecteditems)} variant="contained">{value.label}</Button>
+                </Grid>);
+              })
+              : ''
+            }
+          </Grid>
+        }
+      </Toolbar >);
   };
 
   if (typeof obj === 'object') {
+
+    let internalStuff = (<>
+      {createBar()}
+      <div className={classes.tableWrapper}>
+        <Table
+          stickyHeader={props.options !== undefined ? props.options.selector ? true : false : false}
+          className={classes.table}
+          style={props.styles !== undefined ? props.styles.table !== undefined ? props.styles.table : null : null}>
+          <TableHead style={props.styles !== undefined ? props.styles.tableHead !== undefined ? props.styles.tableHead : null : null}>
+            <TableRow style={props.styles !== undefined ? props.styles.tableRow !== undefined ? props.styles.tableRow : null : null}>
+              {(props.options !== undefined ? props.options.selector ? (props.options.toolbarActions !== undefined ?
+                <Heading key={Math.random()} value={'selection'} style={props.styles !== undefined ? props.styles.heading !== undefined ? props.styles.heading : null : null} /> : null) : null : null)}
+              {(props.options !== undefined ? props.options.actionLocation === 'start' ? (props.options.actions !== undefined ? renderActionHeaders() : null) : null : null)}
+              {renderHeader()}
+              {(props.options !== undefined ? props.options.actionLocation !== 'start' ? (props.options.actions !== undefined ? renderActionHeaders() : null) : null : null)}
+            </TableRow>
+          </TableHead>
+          <TableBody className={classes.tableBody} style={props.styles !== undefined ? props.styles.tableBody !== undefined ? props.styles.tableBody : null : null}>
+            {(obj !== undefined && obj !== null ? getRowsData(obj) : null)}
+            {renderEmptyRows()}
+          </TableBody>
+        </Table>
+      </div>
+      {props.options !== undefined ? props.options.disablePagination ? null :
+        <TablePagination
+          component="div"
+          style={props.styles !== undefined ? props.styles.tablePagination !== undefined ? props.styles.tablePagination : null : null}
+          rowsPerPageOptions={rowsPerPageOptions}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+          onChangePage={() => { }}
+          count={(obj !== undefined && obj !== null ? obj.length : 0)}
+          SelectProps={{
+            inputProps: { 'aria-label': 'rows per page' },
+            native: true
+          }}
+          ActionsComponent={TablePaginationActions}
+        /> :
+        <TablePagination
+          component="div"
+          style={props.styles !== undefined ? props.styles.tablePagination !== undefined ? props.styles.tablePagination : null : null}
+          rowsPerPageOptions={rowsPerPageOptions}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+          onChangePage={() => { }}
+          count={(obj !== undefined && obj !== null ? obj.length : 0)}
+          SelectProps={{
+            inputProps: { 'aria-label': 'rows per page' },
+            native: true
+          }}
+          ActionsComponent={TablePaginationActions}
+        />}
+    </>
+    );
+
     let content = (
       <Paper className={classes.root} style={props.styles !== undefined ? props.styles.paper !== undefined ? props.styles.paper : null : null}>
-        {createBar()}
-        <div className={classes.tableWrapper}>
-          <Table stickyHeader={props.options !== undefined ? props.options.selector ? true : false : false} className={classes.table} style={props.styles !== undefined ? props.styles.table !== undefined ? props.styles.table : null : null}>
-            <TableHead style={props.styles !== undefined ? props.styles.tableHead !== undefined ? props.styles.tableHead : null : null}>
-              <TableRow style={props.styles !== undefined ? props.styles.tableRow !== undefined ? props.styles.tableRow : null : null}>
-                {(props.options !== undefined ? props.options.selector ? (props.options.toolbarActions !== undefined ? <Heading key={Math.random()} value={'selection'} style={props.styles !== undefined ? props.styles.heading !== undefined ? props.styles.heading : null : null} /> : null) : null : null)}
-                {(props.options !== undefined ? props.options.actionLocation === 'start' ? (props.options.actions !== undefined ? renderActionHeaders() : null) : null : null)}
-                {renderHeader()}
-                {(props.options !== undefined ? props.options.actionLocation !== 'start' ? (props.options.actions !== undefined ? renderActionHeaders() : null) : null : null)}
-              </TableRow>
-            </TableHead>
-            <TableBody className={classes.tableBody} style={props.styles !== undefined ? props.styles.tableBody !== undefined ? props.styles.tableBody : null : null}>
-              {(obj !== undefined && obj !== null ? getRowsData(obj) : null)}
-              {renderEmptyRows()}
-            </TableBody>
-          </Table>
-        </div>
-        {props.options !== undefined ? props.options.disablePagination ? null :
-          <TablePagination
-            component="div"
-            style={props.styles !== undefined ? props.styles.tablePagination !== undefined ? props.styles.tablePagination : null : null}
-            rowsPerPageOptions={rowsPerPageOptions}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-            onChangePage={() => { }}
-            count={(obj !== undefined && obj !== null ? obj.length : 0)}
-            SelectProps={{
-              inputProps: { 'aria-label': 'rows per page' },
-              native: true
-            }}
-            ActionsComponent={TablePaginationActions}
-          /> :
-          <TablePagination
-            component="div"
-            style={props.styles !== undefined ? props.styles.tablePagination !== undefined ? props.styles.tablePagination : null : null}
-            rowsPerPageOptions={rowsPerPageOptions}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-            onChangePage={() => { }}
-            count={(obj !== undefined && obj !== null ? obj.length : 0)}
-            SelectProps={{
-              inputProps: { 'aria-label': 'rows per page' },
-              native: true
-            }}
-            ActionsComponent={TablePaginationActions}
-          />}
+        {internalStuff}
       </Paper>
     );
+    if (props.options && props.options.ui && props.options.ui.disableContainer)
+      return (
+        <div className={classes.root}  >
+          {internalStuff}
+        </div>
+      );
     return content;
   }
-  else
-    return <div>INVALID DATA! DATA YOU ARE SENDING IS NOT AN ARRAY OF OBJECTS</div>;
+
+  return <div>INVALID DATA! DATA YOU ARE SENDING IS NOT AN ARRAY OF OBJECTS</div>;
 };
 
 EnhancedTable.propTypes = {
   data: PropTypes.arrayOf(PropTypes.object),
+  rows: PropTypes.number,
   options: PropTypes.shape({
+    ui: PropTypes.shape({
+      disableContainer: PropTypes.bool,
+      disableTitle: PropTypes.bool,
+      maxHeight: PropTypes.any,
+      minWidth: PropTypes.any,
+    }),
+    selector: PropTypes.bool,
     disablePagination: PropTypes.bool,
+    actionLocation: PropTypes.string,
     disablePaginationDefaults: PropTypes.bool,
     onFirstButtonClick: PropTypes.func,
     onBackButtonClick: PropTypes.func,
     onNextButtonClick: PropTypes.func,
     onLastButtonClick: PropTypes.func,
     ignoreKeys: PropTypes.array,
+    titleCaseHeadings: PropTypes.bool,
     actions: PropTypes.arrayOf(PropTypes.shape({
       name: PropTypes.string,
       label: PropTypes.string,
@@ -538,5 +610,6 @@ EnhancedTable.propTypes = {
     })),
   }),
   styles: PropTypes.oneOf(["table", "tableCell", "heading", "toolbar", "paper", "tableRow", "tableHead", "tableBody", "tableFooter", "tablePagination"]),
-  title: PropTypes.string.isRequired
+  title: PropTypes.string.isRequired,
+  error: PropTypes.string,
 };

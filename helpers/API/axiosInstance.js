@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { logout } from '../../contexts/helpers';
-import { notify } from '../../components';
+import { logout } from 'contexts/helpers';
+import { notify } from 'components';
 
 const baseURL = process.env.REACT_APP_BASE_URL + '/api/';
 

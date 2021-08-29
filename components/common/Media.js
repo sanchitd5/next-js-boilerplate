@@ -16,5 +16,5 @@ export const Image = (props) => {
 Image.propTypes = {
   src: PropTypes.string.isRequired,
   style: PropTypes.objectOf(PropTypes.any),
-  alt: PropTypes.string
+  alt: PropTypes.string.isRequired
 };

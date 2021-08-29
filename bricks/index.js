@@ -1,5 +1,7 @@
 import { Layout } from "./layout";
 
-export default {
+const exported = {
     Layout
 };
+
+export default exported;

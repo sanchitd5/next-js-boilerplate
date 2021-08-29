@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Editor } from '@tinymce/tinymce-react';
-import { APIKeys } from '../../constants/index';
+import { APIKeys } from 'constants/index';
 
 /**
  * Created by Sanchit Dang.
